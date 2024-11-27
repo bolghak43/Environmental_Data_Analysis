@@ -1,0 +1,48 @@
+# Load required libraries
+library(readxl)    
+library(dplyr)     
+library(psych)     
+
+# Step 1: Load the dataset
+file_path <- "C:\Users\USER\Desktop\Environmental - Bol Ghak"
+data <- read_excel(file_path, sheet = "Environmental Data Analysis ...")
+
+# Step 2: Clean the data
+# Remove unnecessary columns (e.g., columns with "Unnamed")
+cleaned_data <- data %>%
+  select(-starts_with("Unnamed"))
+
+# Step 3: Descriptive statistics for numerical columns
+# Replace column names below with appropriate numeric column names from your dataset
+numeric_columns <- cleaned_data %>%
+  select_if(is.numeric)
+
+# Summary statistics for numeric columns
+numeric_summary <- describe(numeric_columns)  # Using psych::describe
+print(numeric_summary)
+
+# Step 4: Descriptive statistics for categorical columns
+# Replace column names with categorical ones, such as responses to survey questions
+categorical_summary <- cleaned_data %>%
+  summarise(across(everything(), ~ n_distinct(.), .names = "unique_{col}"))  # Count unique responses
+
+print("Unique responses in categorical columns:")
+print(categorical_summary)
+
+# Frequency counts for specific categorical variables
+# Example: "How concerned are you about current environmental issues?"
+concern_frequency <- cleaned_data %>%
+  count(`How concerned are you about current environmental issues? (e.g. Pollution, climate change)`)
+
+print("Frequency of concern levels:")
+print(concern_frequency)
+
+# Step 5: Create visualizations (optional)
+# Bar plot for categorical frequency
+ggplot(concern_frequency, aes(x = reorder(`How concerned are you about current environmental issues? (e.g. Pollution, climate change)`, -n), y = n)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  labs(title = "Frequency of Concern About Environmental Issues",
+       x = "Concern Levels",
+       y = "Frequency") +
+  theme_minimal() +
+  coord_flip()
